@@ -7,15 +7,22 @@ settings:
 importers:
 
   .:
+    dependencies:
+      '@phc/format':
+        specifier: ^1.0.0
+        version: 1.0.0
     devDependencies:
       '@types/node':
         specifier: ^24.9.2
         version: 24.9.2
+      '@types/phc__format':
+        specifier: ^1.0.1
+        version: 1.0.1
       oxlint:
         specifier: ^1.24.0
         version: 1.24.0(oxlint-tsgolint@0.3.0)
       oxlint-tsgolint:
-        specifier: ^0.3.0
+        specifier: 0.3.0
         version: 0.3.0
       prettier:
         specifier: 3.6.2
@@ -96,8 +103,15 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@phc/format@1.0.0':
+    resolution: {integrity: sha512-m7X9U6BG2+J+R1lSOdCiITLLrxm+cWlNI3HUFA92oLO77ObGNzaKdh8pMLqdZcshtkKuV84olNNXDfMc4FezBQ==}
+    engines: {node: '>=10'}
+
   '@types/node@24.9.2':
     resolution: {integrity: sha512-uWN8YqxXxqFMX2RqGOrumsKeti4LlmIMIyV0lgut4jx7KQBcBiW6vkDtIBvHnHIquwNfJhk8v2OtmO8zXWHfPA==}
+
+  '@types/phc__format@1.0.1':
+    resolution: {integrity: sha512-hoAQFKcP3voXk/ZEl3jrvS63o/HYLszq4nA2mqjytaSEHEy3j3t0gSFtPLnfKtX34k/xfath7etOoGw5ukoqXQ==}
 
   oxlint-tsgolint@0.3.0:
     resolution: {integrity: sha512-q4ZI3TXwiBZsku1RzVlIyk09HY0lI33No87b/XIHLAGm6+3BeyW4D0kIcMok//O65Z5xINTJNlSNkazmkgx8pA==}
@@ -170,9 +184,15 @@ snapshots:
   '@oxlint/win32-x64@1.24.0':
     optional: true
 
+  '@phc/format@1.0.0': {}
+
   '@types/node@24.9.2':
     dependencies:
       undici-types: 7.16.0
+
+  '@types/phc__format@1.0.1':
+    dependencies:
+      '@types/node': 24.9.2
 
   oxlint-tsgolint@0.3.0:
     optionalDependencies:

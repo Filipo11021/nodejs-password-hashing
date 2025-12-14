@@ -19,9 +19,13 @@
   "packageManager": "pnpm@10.12.2",
   "devDependencies": {
     "@types/node": "^24.9.2",
+    "@types/phc__format": "^1.0.1",
     "oxlint": "^1.24.0",
     "oxlint-tsgolint": "0.3.0",
     "prettier": "3.6.2",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@phc/format": "^1.0.0"
   }
 }

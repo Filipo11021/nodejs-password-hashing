@@ -1,21 +1,33 @@
-import { scryptHashing } from "./scrypt.ts";
+import { createScryptHashing } from "./scrypt.ts";
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { argon2Hashing } from "./argon2.ts";
+import { createArgon2Hashing } from "./argon2.ts";
 
 const testImplementations = [
   {
     describe: "scrypt",
-    instance: scryptHashing,
+    instance: createScryptHashing(),
+    instanceWithDifferentOptions: createScryptHashing({
+      cost: 2 ** 10,
+    }),
+    instanceWithDifferentAlgorithm: createArgon2Hashing(),
   },
   {
     describe: "argon2",
-    instance: argon2Hashing,
+    instance: createArgon2Hashing(),
+    instanceWithDifferentOptions: createArgon2Hashing({
+      memory: 2 ** 10,
+    }),
+    instanceWithDifferentAlgorithm: createScryptHashing(),
   },
 ];
 
 for (const implementation of testImplementations) {
   const hashing = implementation.instance;
+  const hashingWithDifferentOptions =
+    implementation.instanceWithDifferentOptions;
+  const instanceWithDifferentAlgorithm =
+    implementation.instanceWithDifferentAlgorithm;
 
   void describe(implementation.describe, () => {
     void it("should return true if the password is valid", async () => {
@@ -41,6 +53,42 @@ for (const implementation of testImplementations) {
       await assert.rejects(async () => {
         await hashing.verify("test", "0");
       }, Error);
+    });
+  });
+
+  describe(`needsReHash - ${implementation.describe}`, () => {
+    void it("should return true if the hash is empty", () => {
+      const res = hashing.needsReHash("");
+      assert.equal(res, true);
+    });
+
+    void it("should return true if the hash is malformed", () => {
+      const res = hashing.needsReHash("halo");
+      assert.equal(res, true);
+    });
+
+    void it("should return false if configuration is the same", async () => {
+      const hash = await hashing.hash("password");
+
+      const res = hashing.needsReHash(hash);
+
+      assert.equal(res, false);
+    });
+
+    void it("should return true if configuration differs", async () => {
+      const hash = await hashing.hash("password");
+
+      const res = hashingWithDifferentOptions.needsReHash(hash);
+
+      assert.equal(res, true);
+    });
+
+    void it("should return true if the hash algorithm differs", async () => {
+      const hash = await instanceWithDifferentAlgorithm.hash("password");
+
+      const res = hashing.needsReHash(hash);
+
+      assert.equal(res, true);
     });
   });
 }
