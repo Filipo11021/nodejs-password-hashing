@@ -1,67 +1,66 @@
 import formatter, { type PhcInput } from "@phc/format";
+import type { StandardSchemaV1 } from "@standard-schema/spec";
 
 type PhcParams = Record<string, string | number>;
 
-export type PhcNode<Params extends PhcParams = PhcParams> = {
-  id: string;
+export type PhcNode<Id extends string, Params extends PhcParams = PhcParams> = {
+  id: Id;
   salt: Buffer;
   hash: Buffer;
   version?: number | undefined;
   params: Params;
 };
 
-type PhcFormatter = {
-  serialize: <Params extends PhcParams = PhcParams>(
+type PhcFormatter<Id extends string, Params extends PhcParams = PhcParams> = {
+  serialize: (
     salt: Buffer<ArrayBufferLike>,
     hash: Buffer<ArrayBufferLike>,
-    options: { id: string; params?: Params; version?: number },
-  ) => string;
-  deserialize: (phcString: string) => PhcNode;
+    options: { id: Id; params: Params; version?: number },
+  ) => Promise<string>;
+  deserialize: (phcString: string) => Promise<PhcNode<Id, Params>>;
 };
 
 class InvalidPhcStringError extends Error {
   constructor(message: string) {
-    super(`Invalid PHC string - Field: ${message}`);
+    super(`Invalid PHC string - ${message}`);
     this.name = "InvalidPhcStringError";
   }
 }
 
-export function createPhcFormatter(): PhcFormatter {
+export function createPhcFormatter<Id extends string, Params extends PhcParams>(
+  schema: StandardSchemaV1<PhcNode<Id, Params>>,
+): PhcFormatter<Id, Params> {
   return {
-    serialize: (salt, hash, options) => {
+    serialize: async (salt, hash, options) => {
       const phcInput: PhcInput = {
         id: options.id,
         salt,
         hash,
+        params: options.params,
       };
-      if (options.params) {
-        phcInput.params = options.params;
-      }
+
       if (options.version) {
         phcInput.version = options.version;
       }
-      return formatter.serialize(phcInput);
+
+      const result = await schema["~standard"].validate(phcInput);
+
+      if (result.issues) {
+        throw new InvalidPhcStringError(JSON.stringify(result.issues, null, 2));
+      }
+
+      return formatter.serialize(result.value as PhcInput);
     },
-    deserialize: (phcString: string) => {
+    deserialize: async (phcString: string) => {
       const phcOutput = formatter.deserialize(phcString);
 
-      if (!phcOutput.salt) {
-        throw new InvalidPhcStringError("salt");
-      }
-      if (!phcOutput.hash) {
-        throw new InvalidPhcStringError("hash");
-      }
-      if (!phcOutput.params) {
-        throw new InvalidPhcStringError("params");
+      const result = await schema["~standard"].validate(phcOutput);
+
+      if (result.issues) {
+        throw new InvalidPhcStringError(JSON.stringify(result.issues, null, 2));
       }
 
-      return {
-        id: phcOutput.id,
-        salt: phcOutput.salt,
-        hash: phcOutput.hash,
-        version: phcOutput.version,
-        params: phcOutput.params,
-      };
+      return result.value;
     },
   };
 }

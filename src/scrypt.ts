@@ -8,7 +8,8 @@ import {
 import { promisify } from "node:util";
 import type { Hashing } from "./hashing.ts";
 import { normalizePassword } from "./utils/normalize-password.ts";
-import { createPhcFormatter, type PhcNode } from "./utils/phc-formatter.ts";
+import { createPhcFormatter } from "./utils/phc-formatter.ts";
+import z from "zod";
 
 const scryptAsync = promisify<
   BinaryLike,
@@ -56,40 +57,20 @@ type ScryptHashingOptions = {
   keyLength?: number;
 };
 
-function validatePhcNode(phcNode: PhcNode) {
-  if (phcNode.id !== "scrypt") {
-    throw new Error("Invalid password hash");
-  }
-
-  if (!phcNode.params) {
-    throw new Error("Invalid password hash");
-  }
-
-  if (!phcNode.params.n) {
-    throw new Error("Invalid password hash");
-  }
-
-  if (!phcNode.params.r) {
-    throw new Error("Invalid password hash");
-  }
-
-  if (!phcNode.params.p) {
-    throw new Error("Invalid password hash");
-  }
-
-  if (!phcNode.hash) {
-    throw new Error("Invalid password hash");
-  }
-
-  if (!phcNode.salt) {
-    throw new Error("Invalid password hash");
-  }
-
-  return phcNode as PhcNode<{ n: number; r: number; p: number }>;
-}
-
 export function createScryptHashing(options?: ScryptHashingOptions): Hashing {
-  const phcFormatter = createPhcFormatter();
+  const phcFormatter = createPhcFormatter(
+    z.object({
+      hash: z.instanceof(Buffer),
+      salt: z.instanceof(Buffer),
+      id: z.literal("scrypt"),
+      params: z.object({
+        cost: z.number(),
+        blocksize: z.number(),
+        parallelization: z.number(),
+      }),
+    }),
+  );
+
   const defaultOptions = {
     cost: options?.cost ?? 2 ** 17,
     blockSize: options?.blockSize ?? 8,
@@ -105,46 +86,33 @@ export function createScryptHashing(options?: ScryptHashingOptions): Hashing {
       return phcFormatter.serialize(saltBuffer, key, {
         id: "scrypt",
         params: {
-          n: defaultOptions.cost,
-          r: defaultOptions.blockSize,
-          p: defaultOptions.parallelization,
+          cost: defaultOptions.cost,
+          blocksize: defaultOptions.blockSize,
+          parallelization: defaultOptions.parallelization,
         },
       });
     },
     async verify(password, hash) {
-      const phcNode = phcFormatter.deserialize(hash);
-      if (phcNode.id !== "scrypt") {
-        throw new Error("Invalid password hash");
-      }
-
-      const validatedPhcNode = validatePhcNode(phcNode);
-      if (!validatedPhcNode.params) {
-        throw new Error("Invalid password hash");
-      }
+      const phcNode = await phcFormatter.deserialize(hash);
 
       const targetKey = await createKeyGenerator({
-        cost: Number(validatedPhcNode.params.n),
-        blockSize: Number(validatedPhcNode.params.r),
-        parallelization: Number(validatedPhcNode.params.p),
-        keyLength: validatedPhcNode.hash.byteLength,
-      }).generateKey(password, validatedPhcNode.salt);
+        cost: phcNode.params.cost,
+        blockSize: phcNode.params.blocksize,
+        parallelization: phcNode.params.parallelization,
+        keyLength: phcNode.hash.byteLength,
+      }).generateKey(password, phcNode.salt);
 
-      return timingSafeEqual(targetKey, validatedPhcNode.hash);
+      return timingSafeEqual(targetKey, phcNode.hash);
     },
-    needsReHash(hash) {
+    async needsReHash(hash) {
       try {
-        const phcNode = phcFormatter.deserialize(hash);
-        if (!phcNode) return false;
+        const phcNode = await phcFormatter.deserialize(hash);
 
-        const validatedPhcNode = validatePhcNode(phcNode);
-        if (!validatedPhcNode.params) return false;
-
-        if (validatedPhcNode.params.n !== defaultOptions.cost) return true;
-        if (validatedPhcNode.params.r !== defaultOptions.blockSize) return true;
-        if (validatedPhcNode.params.p !== defaultOptions.parallelization)
+        if (phcNode.params.cost !== defaultOptions.cost) return true;
+        if (phcNode.params.blocksize !== defaultOptions.blockSize) return true;
+        if (phcNode.params.parallelization !== defaultOptions.parallelization)
           return true;
-        if (validatedPhcNode.hash.byteLength !== defaultOptions.keyLength)
-          return true;
+        if (phcNode.hash.byteLength !== defaultOptions.keyLength) return true;
 
         return false;
       } catch {

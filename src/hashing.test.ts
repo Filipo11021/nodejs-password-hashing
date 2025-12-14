@@ -56,21 +56,21 @@ for (const implementation of testImplementations) {
     });
   });
 
-  describe(`needsReHash - ${implementation.describe}`, () => {
-    void it("should return true if the hash is empty", () => {
-      const res = hashing.needsReHash("");
+  void describe(`needsReHash - ${implementation.describe}`, () => {
+    void it("should return true if the hash is empty", async () => {
+      const res = await hashing.needsReHash("");
       assert.equal(res, true);
     });
 
-    void it("should return true if the hash is malformed", () => {
-      const res = hashing.needsReHash("halo");
+    void it("should return true if the hash is malformed", async () => {
+      const res = await hashing.needsReHash("halo");
       assert.equal(res, true);
     });
 
     void it("should return false if configuration is the same", async () => {
       const hash = await hashing.hash("password");
 
-      const res = hashing.needsReHash(hash);
+      const res = await hashing.needsReHash(hash);
 
       assert.equal(res, false);
     });
@@ -78,7 +78,7 @@ for (const implementation of testImplementations) {
     void it("should return true if configuration differs", async () => {
       const hash = await hashing.hash("password");
 
-      const res = hashingWithDifferentOptions.needsReHash(hash);
+      const res = await hashingWithDifferentOptions.needsReHash(hash);
 
       assert.equal(res, true);
     });
@@ -86,7 +86,7 @@ for (const implementation of testImplementations) {
     void it("should return true if the hash algorithm differs", async () => {
       const hash = await instanceWithDifferentAlgorithm.hash("password");
 
-      const res = hashing.needsReHash(hash);
+      const res = await hashing.needsReHash(hash);
 
       assert.equal(res, true);
     });
