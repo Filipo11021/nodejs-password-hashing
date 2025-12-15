@@ -71,7 +71,7 @@ export function createArgon2Hashing(
     z.object({
       hash: z.instanceof(Buffer),
       salt: z.instanceof(Buffer),
-      id: z.literal("argon2"),
+      id: z.literal("argon2id"),
       params: z.object({
         memory: z.number(),
         passes: z.number(),
@@ -90,7 +90,7 @@ export function createArgon2Hashing(
       const key = await keyGenerator.generateKey(password, saltBuffer);
 
       return phcFormatter.serialize(saltBuffer, key, {
-        id: "argon2",
+        id: "argon2id",
         params: {
           memory: defaultOptions.memory,
           passes: defaultOptions.passes,
