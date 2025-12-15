@@ -1,0 +1,16 @@
+pre-push:
+  jobs:
+    - name: packages audit
+      run: pnpm audit
+
+pre-commit:
+  parallel: true
+  jobs:
+    - name: check lint
+      run: pnpm lint:check {staged_files}
+
+    - name: check format
+      run: pnpm format:check
+
+    - name: check type
+      run: pnpm typecheck
