@@ -53,10 +53,10 @@ type ScryptHashingOptions = Readonly<{
   keyLength: number;
 }>;
 
-// https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#scrypt
-// https://github.com/pilcrowonpaper/oslo/blob/main/src/password/scrypt.ts
-// https://github.com/better-auth/better-auth/blob/canary/packages/better-auth/src/crypto/password.ts
-// https://docs.adonisjs.com/guides/security/hashing#scrypt
+/**
+ * Recommended Scrypt configuration.
+ * @see https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#scrypt
+ */
 const recommendedOptions: ScryptHashingOptions = {
   cost: 2 ** 17,
   blockSize: 8,

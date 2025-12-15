@@ -48,10 +48,10 @@ type Argon2HashingOptions = Readonly<{
   tagLength: number;
 }>;
 
-// https://github.com/ranisalt/node-argon2/blob/master/argon2.cjs#L29
-// https://www.rfc-editor.org/rfc/rfc9106.html#section-7.4
-// https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#argon2id
-// https://docs.adonisjs.com/guides/security/hashing#argon
+/**
+ * Recommended Argon2id configuration.
+ * @see https://www.rfc-editor.org/rfc/rfc9106.html#section-4-5
+ */
 const recommendedOptions: Argon2HashingOptions = {
   memory: 2 ** 16,
   passes: 3,
