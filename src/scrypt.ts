@@ -118,13 +118,16 @@ export function createScryptHashing(
       try {
         const phcNode = await phcFormatter.deserialize(hash);
 
-        if (phcNode.params.cost !== defaultOptions.cost) return true;
-        if (phcNode.params.blocksize !== defaultOptions.blockSize) return true;
-        if (phcNode.params.parallelization !== defaultOptions.parallelization)
-          return true;
-        if (phcNode.hash.byteLength !== defaultOptions.keyLength) return true;
+        const rehashConditions = [
+          phcNode.params.cost !== defaultOptions.cost,
+          phcNode.params.blocksize !== defaultOptions.blockSize,
+          phcNode.params.parallelization !== defaultOptions.parallelization,
+          phcNode.hash.byteLength !== defaultOptions.keyLength,
+        ];
 
-        return false;
+        const requiresRehash = rehashConditions.some(Boolean);
+
+        return requiresRehash;
       } catch {
         return true;
       }

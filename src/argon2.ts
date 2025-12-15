@@ -88,10 +88,14 @@ export function createArgon2Hashing(
     async hash(password) {
       const saltBuffer = randomBytes(16);
       const key = await keyGenerator.generateKey(password, saltBuffer);
-      const { tagLength: _tagLength, ...params } = defaultOptions;
+
       return phcFormatter.serialize(saltBuffer, key, {
         id: "argon2",
-        params,
+        params: {
+          memory: defaultOptions.memory,
+          passes: defaultOptions.passes,
+          parallelism: defaultOptions.parallelism,
+        },
       });
     },
     async verify(password, hash) {
@@ -110,20 +114,16 @@ export function createArgon2Hashing(
       try {
         const phcNode = await phcFormatter.deserialize(hash);
 
-        if (phcNode.params.memory !== defaultOptions.memory) {
-          return true;
-        }
-        if (phcNode.params.passes !== defaultOptions.passes) {
-          return true;
-        }
-        if (phcNode.params.parallelism !== defaultOptions.parallelism) {
-          return true;
-        }
-        if (phcNode.hash.byteLength !== defaultOptions.tagLength) {
-          return true;
-        }
+        const rehashConditions = [
+          phcNode.params.memory !== defaultOptions.memory,
+          phcNode.params.passes !== defaultOptions.passes,
+          phcNode.params.parallelism !== defaultOptions.parallelism,
+          phcNode.hash.byteLength !== defaultOptions.tagLength,
+        ];
 
-        return false;
+        const requiresRehash = rehashConditions.some(Boolean);
+
+        return requiresRehash;
       } catch {
         return true;
       }
