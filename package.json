@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "node --test \"**/*.test.ts\"",
+    "test:coverage": "node --test --experimental-test-coverage \"**/*.test.ts\"",
     "typecheck": "tsc --noEmit",
     "lint:fix": "oxlint --type-aware --fix",
     "lint:check": "oxlint --type-aware",
