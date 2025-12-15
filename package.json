@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "node --test **/*.test.ts",
+    "test": "node --test \"**/*.test.ts\"",
     "typecheck": "tsc --noEmit",
     "lint:fix": "oxlint --type-aware --fix",
     "lint:check": "oxlint --type-aware",
