@@ -23,20 +23,16 @@ type KeyGenerator = {
   generateKey: (password: string, salt: BinaryLike) => Promise<Buffer>;
 };
 
-// https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#scrypt
-// https://github.com/pilcrowonpaper/oslo/blob/main/src/password/scrypt.ts
-// https://github.com/better-auth/better-auth/blob/canary/packages/better-auth/src/crypto/password.ts
-// https://docs.adonisjs.com/guides/security/hashing#scrypt
 function createKeyGenerator({
-  cost = 2 ** 17,
-  blockSize = 8,
-  parallelization = 1,
-  keyLength = 64,
+  cost,
+  blockSize,
+  parallelization,
+  keyLength,
 }: {
-  cost?: number;
-  blockSize?: number;
-  parallelization?: number;
-  keyLength?: number;
+  cost: number;
+  blockSize: number;
+  parallelization: number;
+  keyLength: number;
 }): KeyGenerator {
   return {
     generateKey(password, salt) {
@@ -50,14 +46,32 @@ function createKeyGenerator({
   };
 }
 
-type ScryptHashingOptions = {
-  cost?: number;
-  blockSize?: number;
-  parallelization?: number;
-  keyLength?: number;
+type ScryptHashingOptions = Readonly<{
+  cost: number;
+  blockSize: number;
+  parallelization: number;
+  keyLength: number;
+}>;
+
+// https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#scrypt
+// https://github.com/pilcrowonpaper/oslo/blob/main/src/password/scrypt.ts
+// https://github.com/better-auth/better-auth/blob/canary/packages/better-auth/src/crypto/password.ts
+// https://docs.adonisjs.com/guides/security/hashing#scrypt
+const recommendedOptions: ScryptHashingOptions = {
+  cost: 2 ** 17,
+  blockSize: 8,
+  parallelization: 1,
+  keyLength: 64,
 };
 
-export function createScryptHashing(options?: ScryptHashingOptions): Hashing {
+/**
+ * Creates a Scrypt hashing instance.
+ * @param options - Optional Scrypt configuration to override the recommended defaults.
+ * @see recommended defaults {@link recommendedOptions}
+ */
+export function createScryptHashing(
+  options?: Partial<ScryptHashingOptions>,
+): Hashing {
   const phcFormatter = createPhcFormatter(
     z.object({
       hash: z.instanceof(Buffer),
@@ -71,12 +85,8 @@ export function createScryptHashing(options?: ScryptHashingOptions): Hashing {
     }),
   );
 
-  const defaultOptions = {
-    cost: options?.cost ?? 2 ** 17,
-    blockSize: options?.blockSize ?? 8,
-    parallelization: options?.parallelization ?? 1,
-    keyLength: options?.keyLength ?? 64,
-  };
+  const defaultOptions = { ...recommendedOptions, ...options };
+
   const keyGenerator = createKeyGenerator(defaultOptions);
 
   return {

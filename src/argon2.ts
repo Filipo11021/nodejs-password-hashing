@@ -15,20 +15,17 @@ const argon2Async = promisify(argon2);
 type KeyGenerator = {
   generateKey: (password: string, salt: BinaryLike) => Promise<Buffer>;
 };
-// https://github.com/ranisalt/node-argon2/blob/master/argon2.cjs#L29
-// https://www.rfc-editor.org/rfc/rfc9106.html#section-7.4
-// https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#argon2id
-// https://docs.adonisjs.com/guides/security/hashing#argon
+
 function createKeyGenerator({
-  memory = 2 ** 16,
-  passes = 3,
-  parallelism = 4,
-  tagLength = 32,
+  memory,
+  passes,
+  parallelism,
+  tagLength,
 }: {
-  memory?: number;
-  passes?: number;
-  parallelism?: number;
-  tagLength?: number;
+  memory: number;
+  passes: number;
+  parallelism: number;
+  tagLength: number;
 }): KeyGenerator {
   return {
     generateKey(password, salt) {
@@ -44,14 +41,32 @@ function createKeyGenerator({
   };
 }
 
-type Argon2HashingOptions = {
-  memory?: number;
-  passes?: number;
-  parallelism?: number;
-  tagLength?: number;
+type Argon2HashingOptions = Readonly<{
+  memory: number;
+  passes: number;
+  parallelism: number;
+  tagLength: number;
+}>;
+
+// https://github.com/ranisalt/node-argon2/blob/master/argon2.cjs#L29
+// https://www.rfc-editor.org/rfc/rfc9106.html#section-7.4
+// https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#argon2id
+// https://docs.adonisjs.com/guides/security/hashing#argon
+const recommendedOptions: Argon2HashingOptions = {
+  memory: 2 ** 16,
+  passes: 3,
+  parallelism: 4,
+  tagLength: 32,
 };
 
-export function createArgon2Hashing(options?: Argon2HashingOptions): Hashing {
+/**
+ * Creates an Argon2id hashing instance.
+ * @param options - Optional Argon2id configuration to override the recommended defaults.
+ * @see recommended defaults {@link recommendedOptions}
+ */
+export function createArgon2Hashing(
+  options?: Partial<Argon2HashingOptions>,
+): Hashing {
   const phcFormatter = createPhcFormatter(
     z.object({
       hash: z.instanceof(Buffer),
@@ -65,12 +80,8 @@ export function createArgon2Hashing(options?: Argon2HashingOptions): Hashing {
     }),
   );
 
-  const defaultOptions = {
-    memory: options?.memory ?? 2 ** 16,
-    passes: options?.passes ?? 3,
-    parallelism: options?.parallelism ?? 4,
-    tagLength: options?.tagLength ?? 32,
-  };
+  const defaultOptions = { ...recommendedOptions, ...options };
+
   const keyGenerator = createKeyGenerator(defaultOptions);
 
   return {

@@ -47,7 +47,7 @@ void describe("phc formatter", () => {
     });
   });
 
-  void it("", async () => {
+  void it("should throw an error if the params are not valid", async () => {
     const formatter = createPhcFormatter(
       z.object({
         hash: z.instanceof(Buffer),
