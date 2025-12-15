@@ -21,23 +21,26 @@ void describe("phc formatter", () => {
 
     const salt = Buffer.from("salt");
     const key = Buffer.from("key");
+    const version = 1;
     const params = {
       memory: 1024,
       passes: 1,
       parallelism: 1,
     };
     const hash = await formatter.serialize(salt, key, {
-      id: "argon2",
+      id: "test",
+      version,
       params: params,
     });
 
-    const expectedHash = `$argon2$memory=1024,passes=1,parallelism=1$${salt.toString("base64url")}$${key.toString("base64url")}`;
+    const expectedHash = `$test$v=1$memory=1024,passes=1,parallelism=1$${salt.toString("base64url")}$${key.toString("base64url")}`;
     assert.equal(hash, expectedHash);
 
     const deserializedHash = await formatter.deserialize(expectedHash);
 
     assert.deepEqual(deserializedHash, {
-      id: "argon2",
+      id: "test",
+      version,
       params,
       salt,
       hash: key,
@@ -64,7 +67,7 @@ void describe("phc formatter", () => {
 
     await assert.rejects(async () => {
       await formatter.serialize(salt, key, {
-        id: "argon2",
+        id: "test",
         // @ts-expect-error - Ensure that throws an error
         params: {
           memory: 1024,
@@ -91,7 +94,7 @@ void describe("phc formatter", () => {
 
     await assert.rejects(async () => {
       await formatter.serialize(salt, key, {
-        id: "argon2",
+        id: "test",
         params: {
           TEST: 1024,
         },
