@@ -15,7 +15,7 @@ void describe("phc formatter", () => {
           passes: z.number(),
           parallelism: z.number(),
         }),
-        version: z.number().optional(),
+        version: z.number(),
       }),
     );
 
@@ -58,7 +58,6 @@ void describe("phc formatter", () => {
           passes: z.number(),
           parallelism: z.number(),
         }),
-        version: z.number().optional(),
       }),
     );
 
@@ -85,7 +84,6 @@ void describe("phc formatter", () => {
         params: z.object({
           TEST: z.number(),
         }),
-        version: z.number().optional(),
       }),
     );
 

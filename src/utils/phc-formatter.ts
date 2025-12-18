@@ -1,23 +1,21 @@
 import formatter, { type PhcInput } from "@phc/format";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 
-type PhcParams = Record<string, string | number>;
-
-export type PhcNode<Id extends string, Params extends PhcParams = PhcParams> = {
-  id: Id;
+export type PhcNode = {
+  id: string;
   salt: Buffer;
   hash: Buffer;
-  version?: number | undefined;
-  params: Params;
+  version?: number;
+  params: Record<string, string | number>;
 };
 
-type PhcFormatter<Id extends string, Params extends PhcParams = PhcParams> = {
+type PhcFormatter<T extends PhcNode> = {
   serialize: (
     salt: Buffer<ArrayBufferLike>,
     hash: Buffer<ArrayBufferLike>,
-    options: { id: Id; params: Params; version?: number },
+    options: Omit<T, "salt" | "hash">,
   ) => Promise<string>;
-  deserialize: (phcString: string) => Promise<PhcNode<Id, Params>>;
+  deserialize: (phcString: string) => Promise<T>;
 };
 
 class InvalidPhcStringError extends Error {
@@ -27,9 +25,9 @@ class InvalidPhcStringError extends Error {
   }
 }
 
-export function createPhcFormatter<Id extends string, Params extends PhcParams>(
-  schema: StandardSchemaV1<PhcNode<Id, Params>>,
-): PhcFormatter<Id, Params> {
+export function createPhcFormatter<T extends PhcNode>(
+  schema: StandardSchemaV1<T>,
+): PhcFormatter<T> {
   return {
     serialize: async (salt, hash, options) => {
       const phcInput: PhcInput = {
@@ -39,7 +37,7 @@ export function createPhcFormatter<Id extends string, Params extends PhcParams>(
         params: options.params,
       };
 
-      if (options.version) {
+      if (options.version !== undefined) {
         phcInput.version = options.version;
       }
 
@@ -49,7 +47,7 @@ export function createPhcFormatter<Id extends string, Params extends PhcParams>(
         throw new InvalidPhcStringError(JSON.stringify(result.issues, null, 2));
       }
 
-      return formatter.serialize(result.value as PhcInput);
+      return formatter.serialize(result.value);
     },
     deserialize: async (phcString: string) => {
       const phcOutput = formatter.deserialize(phcString);
