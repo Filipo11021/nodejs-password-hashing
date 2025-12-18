@@ -1,45 +1,7 @@
-import {
-  argon2,
-  randomBytes,
-  timingSafeEqual,
-  type BinaryLike,
-} from "node:crypto";
-import { promisify } from "node:util";
-import type { Hashing } from "./hashing.ts";
-import { normalizePassword } from "./utils/normalize-password.ts";
-import { createPhcFormatter } from "./utils/phc-formatter.ts";
-import z from "zod";
-
-const argon2Async = promisify(argon2);
-
-type KeyGenerator = {
-  generateKey: (password: string, salt: BinaryLike) => Promise<Buffer>;
-};
-
-function createKeyGenerator({
-  memory,
-  passes,
-  parallelism,
-  tagLength,
-}: {
-  memory: number;
-  passes: number;
-  parallelism: number;
-  tagLength: number;
-}): KeyGenerator {
-  return {
-    generateKey(password, salt) {
-      return argon2Async("argon2id", {
-        message: normalizePassword(password),
-        nonce: salt,
-        memory,
-        passes,
-        parallelism,
-        tagLength,
-      });
-    },
-  };
-}
+import { randomBytes, timingSafeEqual } from "node:crypto";
+import type { Hashing } from "../hashing.ts";
+import { createArgon2PhcFormatter } from "./argon2-phc-formatter.ts";
+import { createArgon2KeyGenerator } from "./argon2-key-generator.ts";
 
 type Argon2HashingOptions = Readonly<{
   memory: number;
@@ -67,22 +29,11 @@ const recommendedOptions: Argon2HashingOptions = {
 export function createArgon2Hashing(
   options?: Partial<Argon2HashingOptions>,
 ): Hashing {
-  const phcFormatter = createPhcFormatter(
-    z.object({
-      hash: z.instanceof(Buffer),
-      salt: z.instanceof(Buffer),
-      id: z.literal("argon2id"),
-      params: z.object({
-        memory: z.number(),
-        passes: z.number(),
-        parallelism: z.number(),
-      }),
-    }),
-  );
+  const phcFormatter = createArgon2PhcFormatter();
 
-  const defaultOptions = { ...recommendedOptions, ...options };
+  const defaultOptions = Object.freeze({ ...recommendedOptions, ...options });
 
-  const keyGenerator = createKeyGenerator(defaultOptions);
+  const keyGenerator = createArgon2KeyGenerator(defaultOptions);
 
   return {
     async hash(password) {
@@ -104,7 +55,7 @@ export function createArgon2Hashing(
       try {
         const phcNode = await phcFormatter.deserialize(hash);
 
-        const targetKey = await createKeyGenerator({
+        const targetKey = await createArgon2KeyGenerator({
           memory: phcNode.params.memory,
           passes: phcNode.params.passes,
           parallelism: phcNode.params.parallelism,

@@ -1,50 +1,7 @@
-import {
-  randomBytes,
-  scrypt,
-  timingSafeEqual,
-  type BinaryLike,
-  type ScryptOptions,
-} from "node:crypto";
-import { promisify } from "node:util";
-import type { Hashing } from "./hashing.ts";
-import { normalizePassword } from "./utils/normalize-password.ts";
-import { createPhcFormatter } from "./utils/phc-formatter.ts";
-import z from "zod";
-
-const scryptAsync = promisify<
-  BinaryLike,
-  BinaryLike,
-  number,
-  ScryptOptions,
-  Buffer<ArrayBuffer>
->(scrypt);
-
-type KeyGenerator = {
-  generateKey: (password: string, salt: BinaryLike) => Promise<Buffer>;
-};
-
-function createKeyGenerator({
-  cost,
-  blockSize,
-  parallelization,
-  keyLength,
-}: {
-  cost: number;
-  blockSize: number;
-  parallelization: number;
-  keyLength: number;
-}): KeyGenerator {
-  return {
-    generateKey(password, salt) {
-      return scryptAsync(normalizePassword(password), salt, keyLength, {
-        cost,
-        blockSize,
-        parallelization,
-        maxmem: 128 * blockSize * cost * 2,
-      });
-    },
-  };
-}
+import { randomBytes, timingSafeEqual } from "node:crypto";
+import type { Hashing } from "../hashing.ts";
+import { createScryptPhcFormatter } from "./scrypt-phc-formatter.ts";
+import { createScryptKeyGenerator } from "./scrypt-key-generator.ts";
 
 type ScryptHashingOptions = Readonly<{
   cost: number;
@@ -72,22 +29,11 @@ const recommendedOptions: ScryptHashingOptions = {
 export function createScryptHashing(
   options?: Partial<ScryptHashingOptions>,
 ): Hashing {
-  const phcFormatter = createPhcFormatter(
-    z.object({
-      hash: z.instanceof(Buffer),
-      salt: z.instanceof(Buffer),
-      id: z.literal("scrypt"),
-      params: z.object({
-        cost: z.number(),
-        blocksize: z.number(),
-        parallelization: z.number(),
-      }),
-    }),
-  );
+  const phcFormatter = createScryptPhcFormatter();
 
-  const defaultOptions = { ...recommendedOptions, ...options };
+  const defaultOptions = Object.freeze({ ...recommendedOptions, ...options });
 
-  const keyGenerator = createKeyGenerator(defaultOptions);
+  const keyGenerator = createScryptKeyGenerator(defaultOptions);
 
   return {
     async hash(password) {
@@ -109,7 +55,7 @@ export function createScryptHashing(
       try {
         const phcNode = await phcFormatter.deserialize(hash);
 
-        const targetKey = await createKeyGenerator({
+        const targetKey = await createScryptKeyGenerator({
           cost: phcNode.params.cost,
           blockSize: phcNode.params.blocksize,
           parallelization: phcNode.params.parallelization,

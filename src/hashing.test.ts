@@ -1,7 +1,7 @@
-import { createScryptHashing } from "./scrypt.ts";
+import { createScryptHashing } from "./scrypt/scrypt.ts";
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { createArgon2Hashing } from "./argon2.ts";
+import { createArgon2Hashing } from "./argon2/argon2.ts";
 
 const testImplementations = [
   {
