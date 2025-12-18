@@ -101,16 +101,20 @@ export function createArgon2Hashing(
       });
     },
     async verify(password, hash) {
-      const phcNode = await phcFormatter.deserialize(hash);
+      try {
+        const phcNode = await phcFormatter.deserialize(hash);
 
-      const targetKey = await createKeyGenerator({
-        memory: phcNode.params.memory,
-        passes: phcNode.params.passes,
-        parallelism: phcNode.params.parallelism,
-        tagLength: phcNode.hash.byteLength,
-      }).generateKey(password, phcNode.salt);
+        const targetKey = await createKeyGenerator({
+          memory: phcNode.params.memory,
+          passes: phcNode.params.passes,
+          parallelism: phcNode.params.parallelism,
+          tagLength: phcNode.hash.byteLength,
+        }).generateKey(password, phcNode.salt);
 
-      return timingSafeEqual(targetKey, phcNode.hash);
+        return timingSafeEqual(targetKey, phcNode.hash);
+      } catch {
+        return false;
+      }
     },
     async needsReHash(hash) {
       try {

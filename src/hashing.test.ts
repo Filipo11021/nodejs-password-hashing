@@ -49,10 +49,14 @@ for (const implementation of testImplementations) {
       assert.notEqual(hash, hash2);
     });
 
-    void it("should throw an error if the hash is malformed", async () => {
-      await assert.rejects(async () => {
-        await hashing.verify("test", "0");
-      }, Error);
+    void it("should return false if the hash is malformed", async () => {
+      const isValid = await hashing.verify("test", "malformed-hash");
+      assert.equal(isValid, false);
+    });
+
+    void it("should return false if the hash is empty", async () => {
+      const isValid = await hashing.verify("test", "");
+      assert.equal(isValid, false);
     });
   });
 
