@@ -27,7 +27,9 @@ void describe("phc formatter", () => {
       passes: 1,
       parallelism: 1,
     };
-    const hash = await formatter.serialize(salt, key, {
+    const hash = await formatter.serialize({
+      salt,
+      hash: key,
       id: "test",
       version,
       params: params,
@@ -65,7 +67,9 @@ void describe("phc formatter", () => {
     const key = Buffer.from("key");
 
     await assert.rejects(async () => {
-      await formatter.serialize(salt, key, {
+      await formatter.serialize({
+        salt,
+        hash: key,
         id: "test",
         // @ts-expect-error - Ensure that throws an error
         params: {
@@ -91,7 +95,9 @@ void describe("phc formatter", () => {
     const key = Buffer.from("key");
 
     await assert.rejects(async () => {
-      await formatter.serialize(salt, key, {
+      await formatter.serialize({
+        salt,
+        hash: key,
         id: "test",
         params: {
           TEST: 1024,

@@ -91,10 +91,13 @@ export function createScryptHashing(
 
   return {
     async hash(password) {
-      const saltBuffer = randomBytes(16);
-      const key = await keyGenerator.generateKey(password, saltBuffer);
-      return phcFormatter.serialize(saltBuffer, key, {
+      const salt = randomBytes(16);
+      const key = await keyGenerator.generateKey(password, salt);
+
+      return phcFormatter.serialize({
         id: "scrypt",
+        salt,
+        hash: key,
         params: {
           cost: defaultOptions.cost,
           blocksize: defaultOptions.blockSize,

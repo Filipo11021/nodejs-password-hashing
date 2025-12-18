@@ -86,11 +86,13 @@ export function createArgon2Hashing(
 
   return {
     async hash(password) {
-      const saltBuffer = randomBytes(16);
-      const key = await keyGenerator.generateKey(password, saltBuffer);
+      const salt = randomBytes(16);
+      const key = await keyGenerator.generateKey(password, salt);
 
-      return phcFormatter.serialize(saltBuffer, key, {
+      return phcFormatter.serialize({
         id: "argon2id",
+        salt,
+        hash: key,
         params: {
           memory: defaultOptions.memory,
           passes: defaultOptions.passes,

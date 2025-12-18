@@ -1,4 +1,4 @@
-import formatter, { type PhcInput } from "@phc/format";
+import formatter from "@phc/format";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 
 export type PhcNode = {
@@ -10,11 +10,7 @@ export type PhcNode = {
 };
 
 type PhcFormatter<T extends PhcNode> = {
-  serialize: (
-    salt: Buffer<ArrayBufferLike>,
-    hash: Buffer<ArrayBufferLike>,
-    options: Omit<T, "salt" | "hash">,
-  ) => Promise<string>;
+  serialize: (phcNode: T) => Promise<string>;
   deserialize: (phcString: string) => Promise<T>;
 };
 
@@ -29,19 +25,8 @@ export function createPhcFormatter<T extends PhcNode>(
   schema: StandardSchemaV1<T>,
 ): PhcFormatter<T> {
   return {
-    serialize: async (salt, hash, options) => {
-      const phcInput: PhcInput = {
-        id: options.id,
-        salt,
-        hash,
-        params: options.params,
-      };
-
-      if (options.version !== undefined) {
-        phcInput.version = options.version;
-      }
-
-      const result = await schema["~standard"].validate(phcInput);
+    serialize: async (phcNode) => {
+      const result = await schema["~standard"].validate(phcNode);
 
       if (result.issues) {
         throw new InvalidPhcStringError(JSON.stringify(result.issues, null, 2));
