@@ -1,9 +1,7 @@
 import z from "zod";
 import { MAX_UINT32 } from "../utils/numbers.ts";
 import { bufferSchema } from "../utils/schemas.ts";
-
-const getMaxParallelization = (blockSize: number) =>
-  Math.floor(((Math.pow(2, 32) - 1) * 32) / (128 * blockSize));
+import { getMaxParallelization } from "./get-max-parallelization.ts";
 
 export const scryptPHCDeserializeSchema = z.object({
   id: z.literal("scrypt"),

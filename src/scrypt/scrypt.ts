@@ -6,13 +6,29 @@ import {
   scryptPHCDeserializeSchema,
   type ScryptPhcInput,
 } from "./scrypt-phc-formatter.ts";
+import z from "zod";
+import { MAX_UINT32 } from "../utils/numbers.ts";
+import { getMaxParallelization } from "./get-max-parallelization.ts";
 
-type ScryptHashingOptions = Readonly<{
-  cost: number;
-  blockSize: number;
-  parallelization: number;
-  keyLength: number;
-}>;
+const optionsSchema = z
+  .object({
+    blockSize: z.number().min(1).max(MAX_UINT32),
+    cost: z.number().min(2).max(MAX_UINT32),
+    parallelization: z.number().min(1),
+    keyLength: z.number().min(64).max(128),
+  })
+  .refine(
+    (params) => {
+      const maxP = getMaxParallelization(params.blockSize);
+      return params.parallelization <= maxP;
+    },
+    {
+      message: "parallelization value exceeds maximum based on blocksize",
+    },
+  )
+  .readonly();
+
+type ScryptHashingOptions = z.input<typeof optionsSchema>;
 
 /**
  * Recommended Scrypt configuration.
@@ -33,7 +49,10 @@ const recommendedOptions: ScryptHashingOptions = {
 export function createScryptHashing(
   options?: Partial<ScryptHashingOptions>,
 ): Hashing {
-  const defaultOptions = Object.freeze({ ...recommendedOptions, ...options });
+  const defaultOptions = optionsSchema.parse({
+    ...recommendedOptions,
+    ...options,
+  });
 
   const keyGenerator = createScryptKeyGenerator(defaultOptions);
 

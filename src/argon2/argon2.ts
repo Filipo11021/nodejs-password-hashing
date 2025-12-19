@@ -7,13 +7,27 @@ import {
 } from "./argon2-phc-formatter.ts";
 import { createArgon2KeyGenerator } from "./argon2-key-generator.ts";
 import phcFormatter from "@phc/format";
+import z from "zod";
+import { MAX_UINT24, MAX_UINT32 } from "../utils/numbers.ts";
 
-type Argon2HashingOptions = Readonly<{
-  memory: number;
-  passes: number;
-  parallelism: number;
-  tagLength: number;
-}>;
+const optionsSchema = z
+  .object({
+    memory: z.number().max(MAX_UINT32),
+    passes: z.number().min(2).max(MAX_UINT32),
+    parallelism: z.number().min(1).max(MAX_UINT24),
+    tagLength: z.number().min(4).max(MAX_UINT32),
+  })
+  .refine(
+    (params) => {
+      return params.memory >= 8 * params.parallelism;
+    },
+    {
+      message: "memory parameter must be at least 8 * parallelism",
+    },
+  )
+  .readonly();
+
+type Argon2HashingOptions = z.input<typeof optionsSchema>;
 
 /**
  * Recommended Argon2id configuration.
@@ -34,7 +48,10 @@ const recommendedOptions: Argon2HashingOptions = {
 export function createArgon2Hashing(
   options?: Partial<Argon2HashingOptions>,
 ): Hashing {
-  const defaultOptions = Object.freeze({ ...recommendedOptions, ...options });
+  const defaultOptions = optionsSchema.parse({
+    ...recommendedOptions,
+    ...options,
+  });
 
   const keyGenerator = createArgon2KeyGenerator(defaultOptions);
 
