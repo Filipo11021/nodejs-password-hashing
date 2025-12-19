@@ -11,9 +11,6 @@ importers:
       '@phc/format':
         specifier: ^1.0.0
         version: 1.0.0
-      '@standard-schema/spec':
-        specifier: ^1.0.0
-        version: 1.0.0
       zod:
         specifier: ^4.1.13
         version: 4.1.13
@@ -115,9 +112,6 @@ packages:
   '@phc/format@1.0.0':
     resolution: {integrity: sha512-m7X9U6BG2+J+R1lSOdCiITLLrxm+cWlNI3HUFA92oLO77ObGNzaKdh8pMLqdZcshtkKuV84olNNXDfMc4FezBQ==}
     engines: {node: '>=10'}
-
-  '@standard-schema/spec@1.0.0':
-    resolution: {integrity: sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA==}
 
   '@types/node@24.9.2':
     resolution: {integrity: sha512-uWN8YqxXxqFMX2RqGOrumsKeti4LlmIMIyV0lgut4jx7KQBcBiW6vkDtIBvHnHIquwNfJhk8v2OtmO8zXWHfPA==}
@@ -254,8 +248,6 @@ snapshots:
     optional: true
 
   '@phc/format@1.0.0': {}
-
-  '@standard-schema/spec@1.0.0': {}
 
   '@types/node@24.9.2':
     dependencies:

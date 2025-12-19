@@ -1,7 +1,12 @@
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import type { Hashing } from "../hashing.ts";
-import { createArgon2PhcFormatter } from "./argon2-phc-formatter.ts";
+import {
+  argon2PHCDeserializeSchema,
+  argon2Versions,
+  type Argon2PhcInput,
+} from "./argon2-phc-formatter.ts";
 import { createArgon2KeyGenerator } from "./argon2-key-generator.ts";
+import phcFormatter from "@phc/format";
 
 type Argon2HashingOptions = Readonly<{
   memory: number;
@@ -29,8 +34,6 @@ const recommendedOptions: Argon2HashingOptions = {
 export function createArgon2Hashing(
   options?: Partial<Argon2HashingOptions>,
 ): Hashing {
-  const phcFormatter = createArgon2PhcFormatter();
-
   const defaultOptions = Object.freeze({ ...recommendedOptions, ...options });
 
   const keyGenerator = createArgon2KeyGenerator(defaultOptions);
@@ -40,20 +43,25 @@ export function createArgon2Hashing(
       const salt = randomBytes(16);
       const key = await keyGenerator.generateKey(password, salt);
 
-      return phcFormatter.serialize({
+      const phcInput: Argon2PhcInput = {
         id: "argon2id",
         salt,
         hash: key,
+        version: 19,
         params: {
           memory: defaultOptions.memory,
           passes: defaultOptions.passes,
           parallelism: defaultOptions.parallelism,
         },
-      });
+      };
+
+      return phcFormatter.serialize(phcInput);
     },
     async verify(password, hash) {
       try {
-        const phcNode = await phcFormatter.deserialize(hash);
+        const phcNode = argon2PHCDeserializeSchema.parse(
+          phcFormatter.deserialize(hash),
+        );
 
         const targetKey = await createArgon2KeyGenerator({
           memory: phcNode.params.memory,
@@ -69,9 +77,12 @@ export function createArgon2Hashing(
     },
     async needsReHash(hash) {
       try {
-        const phcNode = await phcFormatter.deserialize(hash);
+        const phcNode = argon2PHCDeserializeSchema.parse(
+          phcFormatter.deserialize(hash),
+        );
 
         const rehashConditions = [
+          !argon2Versions.includes(phcNode.version),
           phcNode.params.memory !== defaultOptions.memory,
           phcNode.params.passes !== defaultOptions.passes,
           phcNode.params.parallelism !== defaultOptions.parallelism,

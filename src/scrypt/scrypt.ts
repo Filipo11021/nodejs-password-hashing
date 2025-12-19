@@ -1,7 +1,11 @@
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import type { Hashing } from "../hashing.ts";
-import { createScryptPhcFormatter } from "./scrypt-phc-formatter.ts";
+import phcFormatter from "@phc/format";
 import { createScryptKeyGenerator } from "./scrypt-key-generator.ts";
+import {
+  scryptPHCDeserializeSchema,
+  type ScryptPhcInput,
+} from "./scrypt-phc-formatter.ts";
 
 type ScryptHashingOptions = Readonly<{
   cost: number;
@@ -29,8 +33,6 @@ const recommendedOptions: ScryptHashingOptions = {
 export function createScryptHashing(
   options?: Partial<ScryptHashingOptions>,
 ): Hashing {
-  const phcFormatter = createScryptPhcFormatter();
-
   const defaultOptions = Object.freeze({ ...recommendedOptions, ...options });
 
   const keyGenerator = createScryptKeyGenerator(defaultOptions);
@@ -40,7 +42,7 @@ export function createScryptHashing(
       const salt = randomBytes(16);
       const key = await keyGenerator.generateKey(password, salt);
 
-      return phcFormatter.serialize({
+      const phcInput: ScryptPhcInput = {
         id: "scrypt",
         salt,
         hash: key,
@@ -49,11 +51,15 @@ export function createScryptHashing(
           blocksize: defaultOptions.blockSize,
           parallelization: defaultOptions.parallelization,
         },
-      });
+      };
+
+      return phcFormatter.serialize(phcInput);
     },
     async verify(password, hash) {
       try {
-        const phcNode = await phcFormatter.deserialize(hash);
+        const phcNode = scryptPHCDeserializeSchema.parse(
+          phcFormatter.deserialize(hash),
+        );
 
         const targetKey = await createScryptKeyGenerator({
           cost: phcNode.params.cost,
@@ -69,7 +75,9 @@ export function createScryptHashing(
     },
     async needsReHash(hash) {
       try {
-        const phcNode = await phcFormatter.deserialize(hash);
+        const phcNode = scryptPHCDeserializeSchema.parse(
+          phcFormatter.deserialize(hash),
+        );
 
         const rehashConditions = [
           phcNode.params.cost !== defaultOptions.cost,
