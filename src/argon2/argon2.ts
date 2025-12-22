@@ -1,12 +1,11 @@
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import type { Hashing } from "../hashing.ts";
 import {
-  argon2PHCDeserializeSchema,
-  argon2Versions,
-  type Argon2PhcInput,
+  argon2DeserializePHC,
+  argon2SerializePHC,
+  isArgon2Version,
 } from "./argon2-phc-formatter.ts";
 import { createArgon2KeyGenerator } from "./argon2-key-generator.ts";
-import phcFormatter from "@phc/format";
 import z from "zod";
 import { MAX_UINT24, MAX_UINT32 } from "../utils/numbers.ts";
 
@@ -60,7 +59,7 @@ export function createArgon2Hashing(
       const salt = randomBytes(16);
       const key = await keyGenerator.generateKey(password, salt);
 
-      const phcInput: Argon2PhcInput = {
+      return argon2SerializePHC({
         id: "argon2id",
         salt,
         hash: key,
@@ -70,15 +69,11 @@ export function createArgon2Hashing(
           passes: defaultOptions.passes,
           parallelism: defaultOptions.parallelism,
         },
-      };
-
-      return phcFormatter.serialize(phcInput);
+      });
     },
     async verify(password, hash) {
       try {
-        const phcNode = argon2PHCDeserializeSchema.parse(
-          phcFormatter.deserialize(hash),
-        );
+        const phcNode = argon2DeserializePHC(hash);
 
         const targetKey = await createArgon2KeyGenerator({
           memory: phcNode.params.memory,
@@ -94,12 +89,10 @@ export function createArgon2Hashing(
     },
     async needsReHash(hash) {
       try {
-        const phcNode = argon2PHCDeserializeSchema.parse(
-          phcFormatter.deserialize(hash),
-        );
+        const phcNode = argon2DeserializePHC(hash);
 
         const rehashConditions = [
-          !argon2Versions.includes(phcNode.version),
+          !isArgon2Version(phcNode.version),
           phcNode.params.memory !== defaultOptions.memory,
           phcNode.params.passes !== defaultOptions.passes,
           phcNode.params.parallelism !== defaultOptions.parallelism,

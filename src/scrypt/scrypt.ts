@@ -1,10 +1,9 @@
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import type { Hashing } from "../hashing.ts";
-import phcFormatter from "@phc/format";
 import { createScryptKeyGenerator } from "./scrypt-key-generator.ts";
 import {
-  scryptPHCDeserializeSchema,
-  type ScryptPhcInput,
+  scryptDeserializePHC,
+  scryptSerializePHC,
 } from "./scrypt-phc-formatter.ts";
 import z from "zod";
 import { MAX_UINT32 } from "../utils/numbers.ts";
@@ -61,7 +60,7 @@ export function createScryptHashing(
       const salt = randomBytes(16);
       const key = await keyGenerator.generateKey(password, salt);
 
-      const phcInput: ScryptPhcInput = {
+      return scryptSerializePHC({
         id: "scrypt",
         salt,
         hash: key,
@@ -70,15 +69,11 @@ export function createScryptHashing(
           blocksize: defaultOptions.blockSize,
           parallelization: defaultOptions.parallelization,
         },
-      };
-
-      return phcFormatter.serialize(phcInput);
+      });
     },
     async verify(password, hash) {
       try {
-        const phcNode = scryptPHCDeserializeSchema.parse(
-          phcFormatter.deserialize(hash),
-        );
+        const phcNode = scryptDeserializePHC(hash);
 
         const targetKey = await createScryptKeyGenerator({
           cost: phcNode.params.cost,
@@ -94,9 +89,7 @@ export function createScryptHashing(
     },
     async needsReHash(hash) {
       try {
-        const phcNode = scryptPHCDeserializeSchema.parse(
-          phcFormatter.deserialize(hash),
-        );
+        const phcNode = scryptDeserializePHC(hash);
 
         const rehashConditions = [
           phcNode.params.cost !== defaultOptions.cost,
