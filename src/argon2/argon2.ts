@@ -15,6 +15,7 @@ const optionsSchema = z
     passes: z.number().min(2).max(MAX_UINT32),
     parallelism: z.number().min(1).max(MAX_UINT24),
     tagLength: z.number().min(4).max(MAX_UINT32),
+    saltLength: z.number().min(16).max(1024),
   })
   .refine(
     (params) => {
@@ -37,6 +38,7 @@ const recommendedOptions: Argon2HashingOptions = {
   passes: 3,
   parallelism: 4,
   tagLength: 32,
+  saltLength: 16,
 };
 
 /**
@@ -56,7 +58,7 @@ export function createArgon2Hashing(
 
   return {
     async hash(password) {
-      const salt = randomBytes(16);
+      const salt = randomBytes(defaultOptions.saltLength);
       const key = await keyGenerator.generateKey(password, salt);
 
       return argon2SerializePHC({

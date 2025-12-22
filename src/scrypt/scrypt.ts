@@ -15,6 +15,7 @@ const optionsSchema = z
     cost: z.number().min(2).max(MAX_UINT32),
     parallelization: z.number().min(1),
     keyLength: z.number().min(64).max(128),
+    saltLength: z.number().min(16).max(1024),
   })
   .refine(
     (params) => {
@@ -38,6 +39,7 @@ const recommendedOptions: ScryptHashingOptions = {
   blockSize: 8,
   parallelization: 1,
   keyLength: 64,
+  saltLength: 16,
 };
 
 /**
@@ -57,7 +59,7 @@ export function createScryptHashing(
 
   return {
     async hash(password) {
-      const salt = randomBytes(16);
+      const salt = randomBytes(defaultOptions.saltLength);
       const key = await keyGenerator.generateKey(password, salt);
 
       return scryptSerializePHC({
