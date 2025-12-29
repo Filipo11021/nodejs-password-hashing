@@ -8,6 +8,9 @@ inputs:
   pnpm-version:
     description: "pnpm version (defaults to packageManager in package.json)"
     required: false
+  registry-url:
+    description: "Registry URL for publishing"
+    required: false
 
 runs:
   using: "composite"
@@ -24,7 +27,8 @@ runs:
       with:
         node-version: ${{ inputs.node-version }}
         cache: "pnpm"
+        registry-url: ${{ inputs.registry-url }}
 
     - name: Install dependencies
       shell: bash
-      run: pnpm install
+      run: pnpm install --frozen-lockfile
