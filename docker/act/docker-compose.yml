@@ -1,0 +1,27 @@
+services:
+  verdaccio:
+    image: verdaccio/verdaccio
+    container_name: verdaccio
+    ports:
+      - "4873:4873"
+    volumes:
+      - ../verdaccio/conf:/verdaccio/conf
+    networks:
+      - act-network
+
+  act:
+    build:
+      context: .
+    volumes:
+      - ${PWD}:${PWD}
+      - /var/run/docker.sock:/var/run/docker.sock
+    working_dir: ${PWD}
+    networks:
+      - act-network
+    depends_on:
+      - verdaccio
+
+networks:
+  act-network:
+    name: act-network
+    driver: bridge

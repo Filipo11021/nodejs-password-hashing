@@ -17,7 +17,10 @@
     "lint:fix": "oxlint --type-aware --fix",
     "lint:check": "oxlint --type-aware",
     "format:fix": "prettier . --write",
-    "format:check": "prettier . --check"
+    "format:check": "prettier . --check",
+    "publish:test": "pnpm publish --dry-run --no-git-checks",
+    "ci:test:dispatch": "docker compose -f ./docker/act/docker-compose.yml run --rm act workflow_dispatch --network act-network --env REGISTRY_URL=http://verdaccio:4873 -P ubuntu-latest=catthehacker/ubuntu:act-latest",
+    "ci:test:push": "docker compose -f ./docker/act/docker-compose.yml run --rm act push --network act-network --env REGISTRY_URL=http://verdaccio:4873 -P ubuntu-latest=catthehacker/ubuntu:act-latest"
   },
   "engines": {
     "node": ">=24.0.0"
@@ -29,14 +32,14 @@
   "devDependencies": {
     "@types/node": "^24.9.2",
     "@types/phc__format": "^1.0.1",
-    "lefthook": "^2.0.11",
-    "oxlint": "^1.32.0",
-    "oxlint-tsgolint": "0.9.0",
+    "lefthook": "^2.0.13",
+    "oxlint": "^1.35.0",
+    "oxlint-tsgolint": "0.10.0",
     "prettier": "3.7.4",
     "typescript": "^5.9.3"
   },
   "dependencies": {
     "@phc/format": "^1.0.0",
-    "zod": "^4.1.13"
+    "zod": "^4.2.1"
   }
 }
