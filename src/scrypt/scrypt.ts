@@ -7,7 +7,7 @@ import {
 } from "./scrypt-phc-formatter.ts";
 import z from "zod";
 import { MAX_UINT32 } from "../utils/numbers.ts";
-import { getMaxParallelization } from "./get-max-parallelization.ts";
+import { isValidParallelization } from "./parallelization-validation.ts";
 
 const optionsSchema = z
   .object({
@@ -18,10 +18,11 @@ const optionsSchema = z
     saltLength: z.number().min(16).max(1024),
   })
   .refine(
-    (params) => {
-      const maxP = getMaxParallelization(params.blockSize);
-      return params.parallelization <= maxP;
-    },
+    (params) =>
+      isValidParallelization({
+        blocksize: params.blockSize,
+        parallelization: params.parallelization,
+      }),
     {
       message: "parallelization value exceeds maximum based on blocksize",
     },

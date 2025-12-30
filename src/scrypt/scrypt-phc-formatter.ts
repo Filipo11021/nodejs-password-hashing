@@ -1,7 +1,7 @@
 import z from "zod";
 import { MAX_UINT32 } from "../utils/numbers.ts";
 import { bufferSchema } from "../utils/schemas.ts";
-import { getMaxParallelization } from "./get-max-parallelization.ts";
+import { isValidParallelization } from "./parallelization-validation.ts";
 import phcFormatter from "@phc/format";
 
 export const scryptPHCDeserializeSchema = z.object({
@@ -15,10 +15,11 @@ export const scryptPHCDeserializeSchema = z.object({
       p: z.number().int().min(1),
     })
     .refine(
-      (params) => {
-        const maxP = getMaxParallelization(params.r);
-        return params.p <= maxP;
-      },
+      (params) =>
+        isValidParallelization({
+          blocksize: params.r,
+          parallelization: params.p,
+        }),
       {
         message: "parallelization value exceeds maximum based on blocksize",
       },
