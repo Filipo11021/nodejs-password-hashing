@@ -27,7 +27,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "",
+  "license": "MIT",
   "packageManager": "pnpm@10.12.2",
   "devDependencies": {
     "@types/node": "^24.9.2",
