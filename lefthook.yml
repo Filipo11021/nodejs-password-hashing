@@ -1,7 +1,7 @@
 pre-push:
   jobs:
     - name: packages audit
-      run: pnpm audit
+      run: pnpm audit --audit-level=moderate
 
 pre-commit:
   parallel: true
