@@ -13,6 +13,8 @@ jobs:
 
       - name: Setup Environment
         uses: ./.github/actions/setup
+      - name: Security Audit
+        run: pnpm audit --audit-level=moderate
 
       - name: Run tests
         run: pnpm test
