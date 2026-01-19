@@ -39,7 +39,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Run type check
-        run: pnpm check-types
+        run: pnpm typecheck
   check-format:
     runs-on: ubuntu-latest
     steps:
