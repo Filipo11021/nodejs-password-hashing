@@ -7,7 +7,52 @@ on:
   workflow_dispatch:
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+
+      - name: Security Audit
+        run: pnpm audit --audit-level=moderate
+
+      - name: Run Tests
+        run: pnpm test
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+
+      - name: Run lint check
+        run: pnpm lint:check
+  check-types:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+
+      - name: Run type check
+        run: pnpm check-types
+  check-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+
+      - name: Run format check
+        run: pnpm format:check
+
   release:
+    needs: [test, lint, check-types, check-format]
     runs-on: ubuntu-latest
 
     permissions:
@@ -25,6 +70,8 @@ jobs:
         uses: ./.github/actions/setup
         with:
           registry-url: https://npm.pkg.github.com
+      - name: Build Package
+        run: pnpm build
 
       - name: Release
         env:
