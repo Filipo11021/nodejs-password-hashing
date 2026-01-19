@@ -1,0 +1,11 @@
+src/
+.github/
+.vscode/
+docker/
+node_modules/
+.gitignore
+.releaserc.json
+lefthook.yml
+pnpm-lock.yaml
+tsconfig.json
+mise.toml
