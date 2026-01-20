@@ -1,9 +1,8 @@
 ## [1.0.1](https://github.com/filipo11021/nodejs-password-hashing/compare/v1.0.0...v1.0.1) (2026-01-19)
 
-
 ### Bug Fixes
 
-* include dist folder in published package ([#28](https://github.com/filipo11021/nodejs-password-hashing/issues/28)) ([001a6a5](https://github.com/filipo11021/nodejs-password-hashing/commit/001a6a5d17aada0e96e0e99e2ea513471813a542))
+- include dist folder in published package ([#28](https://github.com/filipo11021/nodejs-password-hashing/issues/28)) ([001a6a5](https://github.com/filipo11021/nodejs-password-hashing/commit/001a6a5d17aada0e96e0e99e2ea513471813a542))
 
 # 1.0.0 (2026-01-18)
 
