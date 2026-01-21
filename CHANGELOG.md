@@ -1,9 +1,8 @@
 ## [1.0.2](https://github.com/filipo11021/nodejs-password-hashing/compare/v1.0.1...v1.0.2) (2026-01-21)
 
-
 ### Bug Fixes
 
-* **#31:** Options config type resolves to any instead of proper type inference ([73c551e](https://github.com/filipo11021/nodejs-password-hashing/commit/73c551e3c3657444940c4b19ce1a4547d511b715))
+- **#31:** Options config type resolves to any instead of proper type inference ([73c551e](https://github.com/filipo11021/nodejs-password-hashing/commit/73c551e3c3657444940c4b19ce1a4547d511b715))
 
 ## [1.0.1](https://github.com/filipo11021/nodejs-password-hashing/compare/v1.0.0...v1.0.1) (2026-01-19)
 
