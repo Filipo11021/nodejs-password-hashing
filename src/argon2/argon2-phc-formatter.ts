@@ -1,4 +1,4 @@
-import z from "zod";
+import * as z from "zod";
 import { bufferSchema } from "../utils/schemas.ts";
 import { MAX_UINT24, MAX_UINT32 } from "../utils/numbers.ts";
 import phcFormatter from "@phc/format";

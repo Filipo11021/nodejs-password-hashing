@@ -6,7 +6,7 @@ import {
   isArgon2Version,
 } from "./argon2-phc-formatter.ts";
 import { createArgon2KeyGenerator } from "./argon2-key-generator.ts";
-import z from "zod";
+import * as z from "zod";
 import { MAX_UINT24, MAX_UINT32 } from "../utils/numbers.ts";
 
 const optionsSchema = z

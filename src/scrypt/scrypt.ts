@@ -5,7 +5,7 @@ import {
   scryptDeserializePHC,
   scryptSerializePHC,
 } from "./scrypt-phc-formatter.ts";
-import z from "zod";
+import * as z from "zod";
 import { MAX_UINT32 } from "../utils/numbers.ts";
 import { isValidParallelization } from "./parallelization-validation.ts";
 

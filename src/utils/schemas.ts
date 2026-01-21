@@ -1,4 +1,4 @@
-import z from "zod";
+import * as z from "zod";
 
 export const bufferSchema = ({ min, max }: { min: number; max: number }) =>
   z.instanceof(Buffer).refine((buf) => buf.length >= min && buf.length <= max, {
