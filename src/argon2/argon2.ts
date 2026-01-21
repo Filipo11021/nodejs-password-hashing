@@ -1,4 +1,4 @@
-import { randomBytes, timingSafeEqual } from "node:crypto";
+import { randomBytes, timingSafeEqual, type BinaryLike } from "node:crypto";
 import type { Hashing } from "../hashing.ts";
 import {
   argon2DeserializePHC,
@@ -16,6 +16,7 @@ const optionsSchema = z
     parallelism: z.number().min(1).max(MAX_UINT24),
     tagLength: z.number().min(4).max(MAX_UINT32),
     saltLength: z.number().min(16).max(1024),
+    pepper: z.custom<BinaryLike>().optional(),
   })
   .refine(
     (params) => {
@@ -82,6 +83,7 @@ export function createArgon2Hashing(
           passes: phcNode.params.passes,
           parallelism: phcNode.params.parallelism,
           tagLength: phcNode.hash.byteLength,
+          pepper: defaultOptions.pepper,
         }).generateKey(password, phcNode.salt);
 
         return timingSafeEqual(targetKey, phcNode.hash);

@@ -13,11 +13,13 @@ export function createArgon2KeyGenerator({
   passes,
   parallelism,
   tagLength,
+  pepper,
 }: {
   memory: number;
   passes: number;
   parallelism: number;
   tagLength: number;
+  pepper?: BinaryLike | undefined;
 }): KeyGenerator {
   return {
     generateKey(password, salt) {
@@ -28,6 +30,7 @@ export function createArgon2KeyGenerator({
         passes,
         parallelism,
         tagLength,
+        secret: pepper,
       });
     },
   };
