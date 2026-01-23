@@ -1,9 +1,8 @@
 # [2.1.0](https://github.com/filipo11021/nodejs-password-hashing/compare/v2.0.0...v2.1.0) (2026-01-23)
 
-
 ### Features
 
-* add pepper support to argon2 hashing ([#34](https://github.com/filipo11021/nodejs-password-hashing/issues/34)) ([4d508df](https://github.com/filipo11021/nodejs-password-hashing/commit/4d508dfb97b24f82fb1932f7b0263be42ee357af))
+- add pepper support to argon2 hashing ([#34](https://github.com/filipo11021/nodejs-password-hashing/issues/34)) ([4d508df](https://github.com/filipo11021/nodejs-password-hashing/commit/4d508dfb97b24f82fb1932f7b0263be42ee357af))
 
 # [2.0.0](https://github.com/filipo11021/nodejs-password-hashing/compare/v1.0.2...v2.0.0) (2026-01-21)
 
