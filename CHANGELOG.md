@@ -1,17 +1,15 @@
 # [2.0.0](https://github.com/filipo11021/nodejs-password-hashing/compare/v1.0.2...v2.0.0) (2026-01-21)
 
-
 ### Features
 
-* **#33:** tree-shake unused drivers when importing single driver ([e0d7bf0](https://github.com/filipo11021/nodejs-password-hashing/commit/e0d7bf068ad3425e215115686dcdb2704d32915c)), closes [#33](https://github.com/filipo11021/nodejs-password-hashing/issues/33)
-
+- **#33:** tree-shake unused drivers when importing single driver ([e0d7bf0](https://github.com/filipo11021/nodejs-password-hashing/commit/e0d7bf068ad3425e215115686dcdb2704d32915c)), closes [#33](https://github.com/filipo11021/nodejs-password-hashing/issues/33)
 
 ### BREAKING CHANGES
 
-* **#33:** Root package exports have been removed. Import directly from subpaths instead:
+- **#33:** Root package exports have been removed. Import directly from subpaths instead:
 
 Before:
-import { createArgon2Hashing, createScryptHashing,  Hashing,  HashingDep } from '@filipo11021/nodejs-password-hashing'
+import { createArgon2Hashing, createScryptHashing, Hashing, HashingDep } from '@filipo11021/nodejs-password-hashing'
 
 After:
 import { createArgon2Hashing } from '@filipo11021/nodejs-password-hashing/argon2'
