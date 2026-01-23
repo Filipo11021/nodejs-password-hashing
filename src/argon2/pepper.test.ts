@@ -31,14 +31,36 @@ void describe("Argon2 Pepper Support", () => {
       "Verification with a mismatched pepper should fail",
     );
   });
+});
 
-  void it("should handle long peppers correctly (BinaryLike input support)", async () => {
-    const longPepper = Buffer.alloc(32, "a");
-    const hashing = createArgon2Hashing({ pepper: longPepper });
+void describe("Argon2 Pepper Validation", () => {
+  const minIncludedPepper = "a";
+  const minExcludedPepper = "";
 
-    const hash = await hashing.hash(password);
-    const isValid = await hashing.verify(password, hash);
+  const maxIncludedPepper = "a".repeat(1024);
+  const maxExcludedPepper = "a".repeat(1025);
 
-    assert.strictEqual(isValid, true, "Should support Buffer-based peppers");
-  });
+  for (const pepper of [minIncludedPepper, maxIncludedPepper]) {
+    const password = "my-secret-password";
+
+    void it(`should verify a password when the pepper is ${pepper.length} characters long`, async () => {
+      const hashing = createArgon2Hashing({ pepper });
+      const hash = await hashing.hash(password);
+
+      const isValid = await hashing.verify(password, hash);
+      assert.strictEqual(
+        isValid,
+        true,
+        "Verification with the correct pepper should succeed",
+      );
+    });
+  }
+
+  for (const pepper of [minExcludedPepper, maxExcludedPepper]) {
+    void it(`should throw an error if the pepper is ${pepper.length} characters long`, () => {
+      assert.throws(() => {
+        createArgon2Hashing({ pepper });
+      }, "Expected error to be thrown");
+    });
+  }
 });
