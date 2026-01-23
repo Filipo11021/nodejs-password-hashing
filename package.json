@@ -1,12 +1,26 @@
 {
   "name": "@filipo11021/nodejs-password-hashing",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
+  "exports": {
+    "./contracts": {
+      "types": "./dist/hashing.d.ts",
+      "import": "./dist/hashing.js"
+    },
+    "./scrypt": {
+      "types": "./dist/scrypt/scrypt.d.ts",
+      "import": "./dist/scrypt/scrypt.js"
+    },
+    "./argon2": {
+      "types": "./dist/argon2/argon2.d.ts",
+      "import": "./dist/argon2/argon2.js"
+    }
+  },
   "repository": "https://github.com/filipo11021/nodejs-password-hashing",
   "type": "module",
   "scripts": {
