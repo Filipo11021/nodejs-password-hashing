@@ -12,7 +12,7 @@ import { MAX_UINT24, MAX_UINT32 } from "../utils/numbers.ts";
 const optionsSchema = z
   .object({
     memory: z.number().max(MAX_UINT32),
-    passes: z.number().min(2).max(MAX_UINT32),
+    passes: z.number().min(1).max(MAX_UINT32),
     parallelism: z.number().min(1).max(MAX_UINT24),
     tagLength: z.number().min(4).max(MAX_UINT32),
     saltLength: z.number().min(16).max(1024),
@@ -23,7 +23,8 @@ const optionsSchema = z
       return params.memory >= 8 * params.parallelism;
     },
     {
-      message: "memory parameter must be at least 8 * parallelism",
+      message:
+        "memory parameter must be greater than or equal to 8 * parallelism",
     },
   )
   .readonly();
