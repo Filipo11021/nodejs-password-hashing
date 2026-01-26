@@ -1,3 +1,10 @@
+## [2.1.1](https://github.com/filipo11021/nodejs-password-hashing/compare/v2.1.0...v2.1.1) (2026-01-26)
+
+
+### Bug Fixes
+
+* **#26:** downgrade @types/node to v24 and lock in dependabot ([#37](https://github.com/filipo11021/nodejs-password-hashing/issues/37)) ([dcfd6d7](https://github.com/filipo11021/nodejs-password-hashing/commit/dcfd6d77ab1c0e72cacbee17599154108101a3cc)), closes [#26](https://github.com/filipo11021/nodejs-password-hashing/issues/26) [#26](https://github.com/filipo11021/nodejs-password-hashing/issues/26)
+
 # [2.1.0](https://github.com/filipo11021/nodejs-password-hashing/compare/v2.0.0...v2.1.0) (2026-01-23)
 
 ### Features
