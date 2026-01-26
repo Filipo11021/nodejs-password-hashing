@@ -11,19 +11,20 @@ import { MAX_UINT24, MAX_UINT32 } from "../utils/numbers.ts";
 
 const optionsSchema = z
   .object({
-    memory: z.number().lt(MAX_UINT32),
-    passes: z.number().gt(1).lt(MAX_UINT32),
-    parallelism: z.number().gt(1).lt(MAX_UINT24),
-    tagLength: z.number().gt(4).lt(MAX_UINT32),
+    memory: z.number().max(MAX_UINT32),
+    passes: z.number().min(1).max(MAX_UINT32),
+    parallelism: z.number().min(1).max(MAX_UINT24),
+    tagLength: z.number().min(4).max(MAX_UINT32),
     saltLength: z.number().min(16).max(1024),
     pepper: z.string().min(1).max(1024).optional(),
   })
   .refine(
     (params) => {
-      return params.memory > 8 * params.parallelism;
+      return params.memory >= 8 * params.parallelism;
     },
     {
-      message: "memory parameter must be greater than 8 * parallelism",
+      message:
+        "memory parameter must be greater than or equal to 8 * parallelism",
     },
   )
   .readonly();
