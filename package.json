@@ -50,7 +50,7 @@
     "@types/phc__format": "^1.0.1",
     "lefthook": "^2.0.15",
     "oxlint": "^1.41.0",
-    "oxlint-tsgolint": "0.11.1",
+    "oxlint-tsgolint": "0.12.2",
     "prettier": "3.8.1",
     "semantic-release": "^25.0.2",
     "typescript": "^5.9.3"
